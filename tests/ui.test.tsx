@@ -77,6 +77,16 @@ const ids = [...w.document.querySelectorAll(".contract-id")].map((e: any) => e.t
 ok(new Set(ids).size === ids.length, `contract ids unique: ${ids.join(", ")}`);
 ok(text().includes("Recommended ship") || text().includes("Best ships"), "ship recommendation shown");
 
+console.log("\n2b. Which ones should I take?");
+ok(await waitFor(() => !!byText("button", "Which ones should I take?") && !byText("button", "Which ones should I take?").disabled), "best-stack button available");
+click(byText("button", "Which ones should I take?"));
+ok(await waitFor(() => /Take \d+ of 4/.test(text())), "best stack suggested");
+ok(/share pickups and drop-offs|best use of time/.test(text()), "explains why");
+click(byText("button", "Use this stack"));
+ok(await waitFor(() => text().includes("Stack set")), "stack applied");
+for (const sw of [...w.document.querySelectorAll('[role="switch"][aria-checked="false"]')]) click(sw);
+ok(await waitFor(() => w.document.querySelectorAll('[role="switch"][aria-checked="false"]').length === 0), "all contracts switched back on");
+
 console.log("\n3. Pick a ship");
 click(byText("button", "Pick ship"));
 ok(await waitFor(() => text().includes("Your ships")), "fleet dialog opens");

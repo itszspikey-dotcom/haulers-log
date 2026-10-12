@@ -101,12 +101,14 @@ export function useAutoPlanner() {
   const latest = useRef(0);
 
   const optContracts = useMemo(() => toOptimizerContracts(contracts), [contracts]);
+  // Distances are fetched for every contract on the list (switched on or not), so "best stack" can compare them.
+  const allContracts = useMemo(() => toOptimizerContracts(contracts.map((c) => ({ ...c, enabled: true }))), [contracts]);
   const byName = useMemo(() => placeIndex(places), [places]);
 
   // Which places are involved, and which distance pairs are still missing?
   const { placeIds, missing } = useMemo(() => {
     const names = new Set<string>();
-    for (const c of optContracts) for (const l of c.legs) { names.add(l.pickup); names.add(l.drop); }
+    for (const c of allContracts) for (const l of c.legs) { names.add(l.pickup); names.add(l.drop); }
     if (start) names.add(start);
     const ids: Record<string, number> = {};
     for (const n of names) {
@@ -121,7 +123,7 @@ export function useAutoPlanner() {
         if (!(k in distCache) && !failedPairs.has(k)) miss.push([list[i], list[j]]);
       }
     return { placeIds: ids, missing: miss };
-  }, [optContracts, start, byName, distCache]);
+  }, [allContracts, start, byName, distCache]);
 
   // Fetch missing distances
   useEffect(() => {
@@ -203,4 +205,21 @@ export function useAutoPlanner() {
     }, 120);
     return () => clearTimeout(t);
   }, [optContracts, placeIds, missing, distCache, start, returnToStart, ship, ships, ownedIds, padOverrides, byName]);
+}
+
+/** Synchronous distance lookup (Gm) from the cached distances; undefined when unknown. */
+export function useDistanceFn() {
+  const places = useData((d) => d.places);
+  const distCache = useStore((s) => s.distCache);
+  return useMemo(() => {
+    const byName = placeIndex(places);
+    return (a: string, b: string) => {
+      const pa = byName.get(a);
+      const pb = byName.get(b);
+      if (!pa || !pb) return undefined;
+      if (pa.terminalId === pb.terminalId) return 0;
+      const v = distCache[distKey(pa.terminalId, pb.terminalId)];
+      return v === null ? undefined : v;
+    };
+  }, [places, distCache]);
 }

@@ -9,6 +9,7 @@ import { fmt } from "../lib/format";
 import { legReady } from "../state/planner";
 import { PlacePicker } from "./PlacePicker";
 import { Switch, toast } from "./ui";
+import { StackFinder } from "./StackFinder";
 
 const CRATES = [1, 2, 4, 8, 16, 32];
 
@@ -30,6 +31,7 @@ export function ContractsPanel() {
 
       <DropZone onManual={(id) => setEditing(id)} />
       <ImportQueue />
+      <StackFinder />
 
       <AnimatePresence initial={false}>
         {contracts.map((c, i) => (
@@ -104,7 +106,7 @@ function DropZone({ onManual }: { onManual: (id: string) => void }) {
         <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <span style={{ fontWeight: 600 }}>{gemini ? "Add screenshots" : "Add a contract"}</span>
           <span className="muted" style={{ fontSize: 13 }}>
-            {gemini ? "Drop, paste with Ctrl V, or capture the game" : "Screenshot reading is off on this server — type it in"}
+            {gemini ? "Screenshot every contract on offer — paste with Ctrl V, drop, or capture" : "Screenshot reading is off on this server — type it in"}
           </span>
         </span>
       </button>

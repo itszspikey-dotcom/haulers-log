@@ -10,7 +10,7 @@
     "build": "vite build",
     "start": "tsx server.ts --prod",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "tsx tests/logic.test.ts && tsx tests/server.test.ts",
+    "test": "tsx tests/logic.test.ts && tsx tests/stack.test.ts && tsx tests/server.test.ts",
     "test:ui": "tsx tests/ui.test.tsx"
   },
   "dependencies": {
